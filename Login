@@ -1,0 +1,98 @@
+using System;
+using System.Data.SqlClient;
+using System.Security.Cryptography;
+using System.Text;
+
+namespace Webapplicationf
+{
+    public partial class login : System.Web.UI.Page
+    {
+        protected void Page_Load(object sender, EventArgs e)
+        {
+            
+        }
+
+        protected void ButtonLogin_Click(object sender, EventArgs e)
+        {
+            if (Page.IsValid)
+            {
+                try
+                {
+                    string connectionString = "Data Source=P2021-PC00078\\SQLEXPRESS;Initial Catalog=aspserreg;Integrated Security=True;";
+                    using (SqlConnection con = new SqlConnection(connectionString))
+                    {
+                        con.Open();
+
+                        string email = txtEmail.Text.Trim();
+                        string password = txtPassword.Text.Trim();
+                        string employeeId = Employee_Id.Text.Trim();
+                        //we match here the email that is user enter that database stored
+                        string selectQuery = "SELECT pass FROM asuserreg WHERE email = @Email";//@email is just placeholder or lable tha stored email variable which email.Text
+                        using (SqlCommand cmd = new SqlCommand(selectQuery, con))
+                        {
+                            cmd.Parameters.AddWithValue("@Email", email);
+
+                            using (SqlDataReader reader = cmd.ExecuteReader())
+                            {
+                                if (reader.Read())
+                                {
+                                    string dataencryptedpassword = reader["pass"].ToString();//stored encrypted password
+                                    //In databse everyting stored a s object so that we need to convert
+                                    string salt = "prat!kk2024";//fixed salt value
+                                    string hashedPassword = encryption(password, salt);//user eneter
+
+                                    
+                                    System.Diagnostics.Debug.WriteLine($"Stored Hash: {dataencryptedpassword}");
+                                    System.Diagnostics.Debug.WriteLine($"Calculated Hash: {hashedPassword}");
+
+                                    if (hashedPassword == dataencryptedpassword)
+                                    {
+                                        
+                                        Session["email"] = email;//in seeion stored the email that user enter
+                                        Session["Employee_Id"] = employeeId;//stored id that  user enetered
+                                        Response.Redirect("Empdash1.aspx");
+                                    }
+                                    else
+                                    {
+                                        ShowError("Invalid email or password.");
+                                    }
+                                }
+                                else
+                                {
+                                    ShowError("No user found with this email.");
+                                }
+                            }
+                        }
+                    }
+                }
+                catch (SqlException sqlEx)
+                {
+                    ShowError("Database error: " + sqlEx.Message);
+                }
+                //catch (Exception ex)
+                //{
+                //    ShowError("An error occurred: " + ex.Message);
+                //}
+            }
+        }
+
+        private void ShowError(string message)
+        {
+            ErrorMessage.InnerHtml = "<ul><li>" + message + "</li></ul>";
+            ErrorMessage.Visible = true;
+        }
+
+
+        private string encryption(string password, string salt)
+        {
+            using (SHA256 sha256 = SHA256.Create())
+            {
+                byte[] saltedPasswordBytes = Encoding.UTF8.GetBytes(password + salt);
+                byte[] hashBytes = sha256.ComputeHash(saltedPasswordBytes);
+                return Convert.ToBase64String(hashBytes);
+            }
+        }
+
+        
+    }
+}
