@@ -12,7 +12,7 @@ namespace Webapplicationf
             
         }
 
-        protected void ButtonLogin_Click(object sender, EventArgs e)
+        protected void ButtonLogin_Click(object sender, EventArgs e)// method 2
         {
             if (Page.IsValid)
             {
@@ -83,7 +83,7 @@ namespace Webapplicationf
         }
 
 
-        private string encryption(string password, string salt)
+        private string encryption(string password, string salt)//method 1 that returen string hash value
         {
             using (SHA256 sha256 = SHA256.Create())
             {
