@@ -1,0 +1,101 @@
+
+
+using System;
+using System.Data.SqlClient;
+using System.Security.Cryptography;
+using System.Text;
+using System.Web.SessionState;
+//using System.Net.Mail;
+
+
+namespace Webapplicationf
+{
+    public partial class userreg : System.Web.UI.Page
+    {
+        protected void Page_Load(object sender, EventArgs e)
+        {
+        }
+
+        protected void Button1_Click1(object sender, EventArgs e)
+        {
+            if (Page.IsValid)
+            {
+                try
+                {
+                    string connectionString = "Data Source=P2021-PC00078\\SQLEXPRESS;Initial Catalog=aspserreg;Integrated Security=True;";
+
+                    using (SqlConnection con = new SqlConnection(connectionString))
+                    {
+                        con.Open();
+
+                     
+                        string salt = "prat!kk2024";
+                        string hashedPassword = encryption(txtPassword.Text, salt);
+                        string insertQuery = "INSERT INTO asuserreg (email, pass, fname, lname, address, phone, gender, dob, Employee_Id, salt) " +
+                     "VALUES (@Email, @Pass, @Fname, @Lname, @Address, @Phone, @Gender, @DOB, @EmployeeId, CONVERT(varbinary, @Salt))";
+
+                        using (SqlCommand cmd = new SqlCommand(insertQuery, con))
+                        {
+                            cmd.Parameters.AddWithValue("@Email", txtEmail.Text.Trim());
+                            cmd.Parameters.AddWithValue("@Pass", hashedPassword);
+                            cmd.Parameters.AddWithValue("@Salt", salt); // Pass the salt as a string; it will be converted
+                            cmd.Parameters.AddWithValue("@EmployeeId", EmployeeId.Text.Trim());
+                            cmd.Parameters.AddWithValue("@Fname", txtFname.Text.Trim());
+                            cmd.Parameters.AddWithValue("@Lname", txtLname.Text.Trim());
+                            cmd.Parameters.AddWithValue("@Address", txtAdd.Text.Trim());
+                            cmd.Parameters.AddWithValue("@Phone", txtPhone.Text.Trim());
+                            cmd.Parameters.AddWithValue("@Gender", DropDownList1.SelectedItem.Text);
+                            cmd.Parameters.AddWithValue("@DOB", txtDOB.Text.Trim());
+
+                            int count = cmd.ExecuteNonQuery();
+                            if (count > 0)
+                            {
+
+                                Session["Fname"] = txtFname.Text;
+                                Session["Lname"] = txtLname.Text;
+                                Session["Phone"] = txtPhone.Text;
+                                Session["Adddress"] = txtAdd.Text;
+                             
+                                Session["RegistrationTime"] = DateTime.Now;
+
+                               Session["RegisteredEmail"] = txtEmail.Text.Trim();
+                              
+
+
+
+                                Response.Write("<script>alert('Registered successfully');</script>");
+                                Response.Redirect("login.aspx");
+                            }
+                            else
+                            {
+                                Response.Write("<script>alert('Error in registration');</script>");
+                            }
+                        }
+
+
+                    }
+                }
+                catch (SqlException sqlEx)
+                {
+                    Response.Write("<script>alert('Database error: " + sqlEx.Message + "');</script>");
+                }
+                catch (Exception ex)
+                {
+                    Response.Write("<script>alert('An error occurred: " + ex.Message + "');</script>");
+                }
+            }
+        }
+
+     
+        private string encryption(string password, string salt)
+        {
+            using (SHA256 sha256 = SHA256.Create())
+            {
+                byte[] saltedPasswordBytes = Encoding.UTF8.GetBytes(password + salt);
+                byte[] hashBytes = sha256.ComputeHash(saltedPasswordBytes);
+                return Convert.ToBase64String(hashBytes);
+            }
+        }
+    }
+}
+
