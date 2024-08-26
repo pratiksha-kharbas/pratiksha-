@@ -18,7 +18,7 @@ namespace Webapplicationf
             {
                 try
                 {
-                    string connectionString = "Data Source=P2021-PC00078\\SQLEXPRESS;Initial Catalog=aspserreg;Integrated Security=True;";
+                    string connectionString = "Data Source=P2021-PC00078\\SQLEXPRESS;Initial Catalog=aspserreg;Integrated Security=True;"
                     using (SqlConnection con = new SqlConnection(connectionString))
                     {
                         con.Open();
@@ -30,7 +30,7 @@ namespace Webapplicationf
                         string selectQuery = "SELECT pass FROM asuserreg WHERE email = @Email";//@email is just placeholder or lable tha stored email variable which email.Text
                         using (SqlCommand cmd = new SqlCommand(selectQuery, con))
                         {
-                            cmd.Parameters.AddWithValue("@Email", email);
+                            cmd.Parameters.AddWithValue("@Email", email);//add user enter value that is pass to @Email.
 
                             using (SqlDataReader reader = cmd.ExecuteReader())
                             {
@@ -39,7 +39,7 @@ namespace Webapplicationf
                                     string dataencryptedpassword = reader["pass"].ToString();//stored encrypted password
                                     //In databse everyting stored a s object so that we need to convert
                                     string salt = "prat!kk2024";//fixed salt value
-                                    string hashedPassword = encryption(password, salt);//user eneter
+                                    string hashedPassword = encryption(password, salt);//user enter
 
                                     
                                     System.Diagnostics.Debug.WriteLine($"Stored Hash: {dataencryptedpassword}");
