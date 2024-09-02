@@ -1,0 +1,46 @@
+namespace practiceapplication
+{
+    internal class Program
+    {
+        public int addition(int a, int b)
+        {
+            return a + b;
+        }
+
+        static void Main(string[] args)
+        {
+           
+        }
+    }
+}
+
+
+///
+Testing code
+
+
+using Microsoft.VisualStudio.TestTools.UnitTesting;
+using practiceapplication; 
+
+namespace UnitTestProject1
+{
+    [TestClass]
+    public class UnitTest1
+    {
+        [TestMethod]
+        public void TestAddition()
+        {
+            // Arrange
+            Program program = new Program();
+            int a = 5;
+            int b = 3;
+            int expectedSum = 8;
+
+            // Act
+            int actualSum = program.addition(a, b);
+
+            // Assert
+            Assert.AreEqual(expectedSum, actualSum, "The addition method did not return the correct sum.");
+        }
+    }
+}
